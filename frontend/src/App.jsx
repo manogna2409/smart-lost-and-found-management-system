@@ -28,6 +28,7 @@ function App() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -79,6 +80,44 @@ function App() {
       setLoading(false);
     }
   };
+// REGISTER
+const handleRegister = async (event) => {
+  event.preventDefault();
+  clearMessages();
+  setLoading(true);
+
+  try {
+    const response = await fetch(`${API}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Registration failed.");
+    }
+
+    setError("");
+    alert("Registration successful! Please log in.");
+    setPage("login");
+    setPassword("");
+  } catch (err) {
+    setError(
+      err.message === "Failed to fetch"
+        ? "Cannot connect to backend. Please try again."
+        : err.message
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
+  
 
   // LOGOUT
   const handleLogout = () => {
@@ -568,11 +607,91 @@ console.log("User ID:", userId);
                 {loading ? "Logging in..." : "Login"}
               </button>
             </form>
+<p>
+  Don't have an account?{" "}
+  <button
+    type="button"
+    onClick={() => {
+      clearMessages();
+      setPage("register");
+    }}
+  >
+    Register
+  </button>
+</p>
 
-            {error && <p style={{ color: "#dc2626" }}>{error}</p>}
+{error && <p style={{ color: "#dc2626" }}>{error}</p>}
+
           </div>
         </section>
       )}
+      
+{/* REGISTER */}
+{page === "register" && (
+  <section className="features login-section">
+    <div className="login-box">
+      <h1>Create Account 📝</h1>
+      <p>Register for your Smart Lost &amp; Found account.</p>
+
+      <form onSubmit={handleRegister}>
+        <label htmlFor="register-name">Full Name</label>
+        <input
+          id="register-name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter your full name"
+          required
+        />
+
+        <label htmlFor="register-email">Email</label>
+        <input
+          id="register-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email"
+          required
+        />
+
+        <label htmlFor="register-password">Password</label>
+        <input
+          id="register-password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Create a password"
+          minLength={6}
+          required
+        />
+
+        <button
+          className="primary-btn"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Creating account..." : "Register"}
+        </button>
+      </form>
+
+      {error && <p style={{ color: "#dc2626" }}>{error}</p>}
+
+      <p>
+        Already have an account?{" "}
+        <button
+          type="button"
+          onClick={() => {
+            clearMessages();
+            setPage("login");
+          }}
+        >
+          Login
+        </button>
+      </p>
+    </div>
+  </section>
+)}
+
 
       {/* DASHBOARD */}
       {page === "dashboard" && (
